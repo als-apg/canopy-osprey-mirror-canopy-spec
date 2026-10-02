@@ -1,0 +1,55 @@
+{
+  "id": "pv-button",
+  "version": "1.0.0",
+  "description": "Action button that writes press/release values to a PV.",
+  "supportsPv": true,
+  "supportsRules": true,
+  "supportsChildren": false,
+  "propSchema": {
+    "$schema": "https://json-schema.org/draft-07/schema",
+    "type": "object",
+    "required": [
+      "pv"
+    ],
+    "properties": {
+      "pv": {
+        "type": "string",
+        "format": "pv-channel"
+      },
+      "label": {
+        "type": "string"
+      },
+      "kind": {
+        "type": "string",
+        "enum": [
+          "primary",
+          "secondary",
+          "tertiary",
+          "danger",
+          "ghost"
+        ],
+        "default": "primary"
+      },
+      "iconOnly": {
+        "type": "boolean",
+        "default": false
+      },
+      "pressValue": {
+        "type": [
+          "number",
+          "string"
+        ]
+      },
+      "releaseValue": {
+        "type": [
+          "number",
+          "string"
+        ]
+      },
+      "fontSize": {
+        "type": "number",
+        "title": "Font Size (px)"
+      }
+    }
+  }
+}
