@@ -16,8 +16,27 @@
         "type": "string",
         "format": "pv-channel"
       },
+      "readbackPV": {
+        "type": "string",
+        "format": "pv-channel",
+        "description": "State source for toggle/on-off labeling (EDM indicatorPv); pv stays the write channel."
+      },
       "label": {
         "type": "string"
+      },
+      "onLabel": {
+        "type": "string"
+      },
+      "offLabel": {
+        "type": "string"
+      },
+      "buttonType": {
+        "type": "string",
+        "enum": [
+          "push",
+          "toggle"
+        ],
+        "default": "push"
       },
       "kind": {
         "type": "string",
@@ -49,6 +68,27 @@
       "fontSize": {
         "type": "number",
         "title": "Font Size (px)"
+      },
+      "labelType": {
+        "type": "string",
+        "enum": [
+          "literal",
+          "pvState"
+        ],
+        "default": "literal",
+        "description": "pvState renders the readback PV's current enum string as the face text (EDM menu-button behavior)."
+      },
+      "onColor": {
+        "type": "string"
+      },
+      "offColor": {
+        "type": "string"
+      },
+      "foregroundColor": {
+        "type": "string"
+      },
+      "backgroundColor": {
+        "type": "string"
       }
     }
   }

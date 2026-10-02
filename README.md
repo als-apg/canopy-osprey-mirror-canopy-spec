@@ -15,7 +15,7 @@ conformance/
 tools/check.py                     checks the spec against itself (run in CI)
 ```
 
-**Not in this repo:** SDK code, editor metadata (palette icons, inspector layout, display names), converter mappings (`qtMapping`, `qtPropMap`), and widget component names. Those belong to the tools that use them.
+**Not in this repo:** SDK code, editor metadata (palette icons, inspector layout, display names), converter mappings (`qtMapping`, `qtPropMap`), and widget component names. Those belong to the tools that use them: editor metadata and component names to `@slaclab/canopy-screen-widgets`, converter mappings to `pydm-converter-tool`.
 
 ## The Screen IR
 
@@ -53,7 +53,7 @@ Each file in `screen-ir/widgets/` defines one IR widget type:
 
 **The list of IR widget types is the set of files in this directory.** No separate list is kept, so there's nothing to fall out of sync. `absolute-canvas` is the document root, and `unknown-widget` is the converter's placeholder for source classes it has no definition for. Both are real types and have files here.
 
-**In v0.1 the prop schemas describe props but aren't enforced.** They're carried over from the Beaver registry unchanged, and some of their constraints would reject real screens:
+**In v0.1 the prop schemas describe props but aren't enforced.** They're carried over from the Beaver registry, and some of their constraints would reject real screens:
 - `"type": "number"` rejects macro values like `"$(PREC)"`;
 - several `required` lists don't match what the builder writes.
 
@@ -119,7 +119,7 @@ Don't edit copied files in an SDK. Change the spec here first.
 ## Where the initial content came from
 
 - `screen-ir/screen-ir.schema.json`: copied byte-for-byte from `slaclab/canopy-sdk-js` `packages/screen-ir/schema/` at `74fc229` (package version 0.1.2).
-- `screen-ir/widgets/*.json`: the IR fields (`id`, `version`, `description`, `propSchema`, `supportsPv`, `supportsRules`, `supportsChildren`) taken from `slaclab/canopy` `widget-registry-data/widgets/*.json` at `bfd8104`. The values are unchanged (checked field by field). The files are not byte-identical: the other fields were dropped and the JSON was reformatted. `unknown-widget.json` is new; it describes what `pydm-converter-tool` emits.
+- `screen-ir/widgets/*.json`: the IR fields (`id`, `version`, `description`, `propSchema`, `supportsPv`, `supportsRules`, `supportsChildren`) taken from `slaclab/canopy` `widget-registry-data/widgets/*.json` at `bfd8104`. The values are unchanged (checked field by field), except two prop schemas: `pv-button` and `absolute-canvas` come from `pydm-converter-tool`'s bundled registry at `019ee4e`, which adds the props the converter has emitted since 1.0.6 (nine on `pv-button`, `backgroundColor` on `absolute-canvas`). The files are not byte-identical: the other fields were dropped and the JSON was reformatted. `unknown-widget.json` is new; it describes what `pydm-converter-tool` emits.
 - `conformance/screen-ir/validate/*.json`: new. They cover the cases in `canopy-sdk-js`'s `validate.test.ts` and the semantic rules in its `validate.ts`.
 
 Background: slaclab/canopy-sdk-js#4 and slaclab/canopy-screen-runtime#6.
