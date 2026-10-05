@@ -21,7 +21,7 @@
       "pattern": "^[a-z][a-z0-9-]*$"
     },
     "version": {
-      "description": "Semver of this definition, release versions only (no pre-release suffix). Bump the major version on an incompatible propSchema change.",
+      "description": "Semver of this definition, release versions only (no pre-release suffix). Bump the major version on an incompatible propSchema change and the minor version on a compatible one, such as a new optional prop.",
       "type": "string",
       "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
     },
@@ -30,7 +30,7 @@
       "minLength": 1
     },
     "supportsPv": {
-      "description": "The widget binds to at least one PV.",
+      "description": "The widget binds a PV through a top-level `pv-channel` prop. False for widgets whose PVs sit only in nested props, such as `waveform-plot` curves.",
       "type": "boolean"
     },
     "supportsRules": {
@@ -42,11 +42,11 @@
       "type": "boolean"
     },
     "propSchema": {
-      "description": "JSON Schema (draft-07) describing the node's `props`. Descriptive in v0.1: not enforced by conformance (see README).",
+      "description": "JSON Schema (draft-07) describing the node's `props`. String props that hold a PV address carry `format: \"pv-channel\"` (see README). Descriptive in v0.1: not enforced by conformance (see README).",
       "type": "object",
       "required": ["$schema", "type"],
       "properties": {
-        "$schema": { "const": "https://json-schema.org/draft-07/schema" },
+        "$schema": { "const": "http://json-schema.org/draft-07/schema#" },
         "type": { "const": "object" }
       }
     }

@@ -1,10 +1,13 @@
 """Check the spec against itself.
 
-1. Every schema in the repo is a valid JSON Schema for its draft.
+1. Every schema in the repo is a valid JSON Schema for the draft its `$schema`
+   names, and names a draft the validator recognizes.
 2. Every widget definition satisfies screen-ir/widget-definition.schema.json,
    its filename equals its id, and its propSchema is a valid draft-07 schema.
 3. Every conformance case is well formed and produces its expected outcome
    under the reference validator below.
+4. Every semantic rule id in conformance/case.schema.json is documented in the
+   README's rules table.
 
 The reference validator exists to keep the fixtures honest. It is not an SDK:
 language SDKs implement validation themselves and run the same fixtures.
@@ -19,9 +22,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from jsonschema import Draft7Validator, Draft202012Validator
+from jsonschema import Draft202012Validator, validators
 
 ROOT = Path(__file__).resolve().parent.parent
+README = ROOT / "README.md"
 SCREEN_IR = ROOT / "screen-ir"
 IR_SCHEMA = SCREEN_IR / "screen-ir.schema.json"
 WIDGET_DEFINITION_SCHEMA = SCREEN_IR / "widget-definition.schema.json"
@@ -40,6 +44,20 @@ def load(path: Path) -> Any:
 def pointer(parts: Any) -> str:
     """RFC 6901 JSON Pointer for a path of keys and indexes."""
     return "".join("/" + str(p).replace("~", "~0").replace("/", "~1") for p in parts)
+
+
+def declared_validator(schema: Any) -> Any:
+    """The validator class for the draft a schema's `$schema` names, or None if it names none we know.
+
+    Consumers pick the draft from `$schema` (ajv, jsonschema.validators.validator_for), so the
+    checks do too: an unrecognized URI fails here instead of silently falling back to another draft.
+    """
+    return validators.validator_for(schema, default=None) if isinstance(schema, dict) else None
+
+
+def rule_ids(case_schema: Any) -> list[str]:
+    """The `rule` enum in conformance/case.schema.json: the one list of rule ids."""
+    return case_schema["properties"]["errors"]["items"]["properties"]["rule"]["enum"]
 
 
 # ── Reference validator ──────────────────────────────────────────────────────
@@ -92,45 +110,89 @@ def validate_screen(doc: Any, validator: Draft202012Validator) -> list[dict[str,
 # ── Checks ───────────────────────────────────────────────────────────────────
 
 
-def check_schemas(problems: list[str]) -> None:
+def check_schemas(problems: list[str]) -> dict[Path, Any] | None:
+    """Load the repo's own schemas. None if any is unusable: the other checks depend on all three."""
+    schemas: dict[Path, Any] = {}
     for path in (IR_SCHEMA, WIDGET_DEFINITION_SCHEMA, CASE_SCHEMA):
+        rel = path.relative_to(ROOT)
         try:
-            Draft202012Validator.check_schema(load(path))
+            schema = load(path)
+        except (OSError, ValueError) as e:
+            problems.append(f"{rel}: cannot read: {e}")
+            continue
+        if declared_validator(schema) is not Draft202012Validator:
+            problems.append(f"{rel}: $schema does not name the 2020-12 meta-schema")
+            continue
+        try:
+            Draft202012Validator.check_schema(schema)
         except Exception as e:  # noqa: BLE001 - report any schema error
-            problems.append(f"{path.relative_to(ROOT)}: not a valid 2020-12 schema: {e}")
+            problems.append(f"{rel}: not a valid 2020-12 schema: {e}")
+            continue
+        schemas[path] = schema
+    return schemas if len(schemas) == 3 else None
 
 
-def check_widgets(problems: list[str]) -> int:
-    meta = Draft202012Validator(load(WIDGET_DEFINITION_SCHEMA))
+def check_rule_ids(case_schema: Any, problems: list[str]) -> None:
+    readme = README.read_text(encoding="utf-8")
+    for rule in rule_ids(case_schema):
+        if rule != "schema" and f"| `{rule}` |" not in readme:
+            problems.append(
+                f"README.md: semantic rule {rule!r} from {CASE_SCHEMA.relative_to(ROOT)} "
+                "is missing from the rules table"
+            )
+
+
+def check_widgets(definition_schema: Any, problems: list[str]) -> int:
+    meta = Draft202012Validator(definition_schema)
     files = sorted(WIDGETS.glob("*.json"))
     for path in files:
         rel = path.relative_to(ROOT)
-        doc = load(path)
+        try:
+            doc = load(path)
+        except (OSError, ValueError) as e:
+            problems.append(f"{rel}: cannot read: {e}")
+            continue
         for e in meta.iter_errors(doc):
             problems.append(f"{rel}{pointer(e.absolute_path)}: {e.message}")
-        if isinstance(doc, dict):
-            if doc.get("id") != path.stem:
-                problems.append(f"{rel}: id {doc.get('id')!r} does not match the filename")
-            try:
-                Draft7Validator.check_schema(doc.get("propSchema", {}))
-            except Exception as e:  # noqa: BLE001
-                problems.append(f"{rel}/propSchema: not a valid draft-07 schema: {e}")
+        if not isinstance(doc, dict):
+            continue
+        if doc.get("id") != path.stem:
+            problems.append(f"{rel}: id {doc.get('id')!r} does not match the filename")
+        prop_schema = doc.get("propSchema")
+        if not isinstance(prop_schema, dict):
+            continue  # reported by the meta-schema above
+        cls = declared_validator(prop_schema)
+        if cls is None:
+            problems.append(f"{rel}/propSchema: $schema {prop_schema.get('$schema')!r} names no known draft")
+            continue
+        try:
+            cls.check_schema(prop_schema)
+        except Exception as e:  # noqa: BLE001
+            problems.append(f"{rel}/propSchema: not a valid {prop_schema['$schema']} schema: {e}")
     return len(files)
 
 
-def check_cases(problems: list[str]) -> int:
-    case_meta = Draft202012Validator(load(CASE_SCHEMA))
-    ir = Draft202012Validator(load(IR_SCHEMA))
+def check_cases(case_schema: Any, ir_schema: Any, problems: list[str]) -> int:
+    case_meta = Draft202012Validator(case_schema)
+    ir = Draft202012Validator(ir_schema)
+    known_rules = set(rule_ids(case_schema))
     files = sorted(VALIDATE_CASES.glob("*.json"))
     for path in files:
         rel = path.relative_to(ROOT)
-        case = load(path)
+        try:
+            case = load(path)
+        except (OSError, ValueError) as e:
+            problems.append(f"{rel}: cannot read: {e}")
+            continue
         shape = [f"{pointer(e.absolute_path)}: {e.message}" for e in case_meta.iter_errors(case)]
         if shape:
             problems.extend(f"{rel}{p}" for p in shape)
             continue
 
         actual = validate_screen(case["screen"], ir)
+        unlisted = sorted({e["rule"] for e in actual} - known_rules)
+        if unlisted:
+            problems.append(f"{rel}: reference validator reported rule ids not in case.schema.json: {unlisted}")
         if (not actual) != case["valid"]:
             problems.append(f"{rel}: expected valid={case['valid']}, got errors {actual}")
             continue
@@ -142,9 +204,12 @@ def check_cases(problems: list[str]) -> int:
 
 def main() -> int:
     problems: list[str] = []
-    check_schemas(problems)
-    widgets = check_widgets(problems)
-    cases = check_cases(problems)
+    widgets = cases = 0
+    schemas = check_schemas(problems)
+    if schemas is not None:
+        check_rule_ids(schemas[CASE_SCHEMA], problems)
+        widgets = check_widgets(schemas[WIDGET_DEFINITION_SCHEMA], problems)
+        cases = check_cases(schemas[CASE_SCHEMA], schemas[IR_SCHEMA], problems)
     for p in problems:
         print(f"FAIL {p}")
     print(f"{widgets} widget definitions, {cases} conformance cases, {len(problems)} problems")

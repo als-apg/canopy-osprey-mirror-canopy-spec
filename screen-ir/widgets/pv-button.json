@@ -1,12 +1,12 @@
 {
   "id": "pv-button",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Action button that writes press/release values to a PV.",
   "supportsPv": true,
   "supportsRules": true,
   "supportsChildren": false,
   "propSchema": {
-    "$schema": "https://json-schema.org/draft-07/schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "required": [
       "pv"

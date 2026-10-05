@@ -40,16 +40,18 @@ JSON Schema can't express these rules, so they're defined here. An implementatio
 | `macro-default-forbidden` | `kind` is `template` and a macro declares a `default` | `/macros/{i}` |
 | `fox-ref-unresolved` | A `fox://<name>` reference has no `formulas[]` entry named `<name>`. Checked in: top-level string prop values, a rule's `formula`, and a rule's `pvs[].name` | The prop, `.../rules/{j}/formula`, or `.../rules/{j}/pvs/{k}/name` |
 
-A rule's `formula` may be written with or without the `fox://` prefix. Nested prop values, such as channels inside `waveform-plot` curves, aren't checked in v0.1.
+A rule's `formula` may be written with or without the `fox://` prefix; either way it names a formula, it isn't an inline expression. Nested prop values, such as channels inside `waveform-plot` curves, aren't checked in v0.1, and implementations must not report them.
 
 ### Widget definitions
 
 Each file in `screen-ir/widgets/` defines one IR widget type:
 - **`id`** is the IR `type` value and must equal the filename.
-- **`version`** is a semver string. Bump the major version on an incompatible `propSchema` change.
+- **`version`** is a semver string. Bump the major version on an incompatible `propSchema` change and the minor version on a compatible one, such as a new optional prop.
 - **`description`** says what the widget is.
-- **`supportsPv`**, **`supportsRules`** and **`supportsChildren`** say whether the widget binds PVs, whether rules can target it, and whether its node can have `children`.
-- **`propSchema`** is a JSON Schema (draft-07) describing the node's `props`.
+- **`supportsPv`**, **`supportsRules`** and **`supportsChildren`** say whether the widget binds a PV through a top-level `pv-channel` prop, whether rules can target it, and whether its node can have `children`. `waveform-plot` binds PVs only inside its `curves`, so its `supportsPv` is false.
+- **`propSchema`** is a JSON Schema (draft-07, `"$schema": "http://json-schema.org/draft-07/schema#"`) describing the node's `props`.
+
+**`format: "pv-channel"`** marks a string prop whose value is a PV address, such as `DEMO:A`, `ca://DEMO:A` or `pva://DEMO:A`, or a `fox://<name>` formula reference. A rule's `targetProperty` can't name a `pv-channel` prop.
 
 **The list of IR widget types is the set of files in this directory.** No separate list is kept, so there's nothing to fall out of sync. `absolute-canvas` is the document root, and `unknown-widget` is the converter's placeholder for source classes it has no definition for. Both are real types and have files here.
 
@@ -82,9 +84,9 @@ Each invalid case breaks exactly one rule. Schema-error locations were chosen to
 
 | Implementation | Result | Notes |
 |---|---|---|
-| `tools/check.py` (reference) | Level 2, 17/17 | |
-| `@slaclab/canopy-screen-ir` `validate()` | Level 1, 17/17 | Schema error paths match. Semantic errors are returned as plain strings without a rule id or path |
-| `pydm-converter-tool` `validate_screen_json` | 12/17 | Schema only: it accepts the five semantically invalid cases, so the converter can emit screens that `validate()` rejects |
+| `tools/check.py` (reference) | Level 2, 22/22 | |
+| `@slaclab/canopy-screen-ir` `validate()` | Level 1, 22/22 | Schema error paths match. Semantic errors are returned as plain strings without a rule id or path |
+| `pydm-converter-tool` `validate_screen_json` | 16/22 | Schema only: it accepts the six semantically invalid cases, so the converter can emit screens that `validate()` rejects |
 
 ## Using the spec from an SDK
 
@@ -113,13 +115,18 @@ Don't edit copied files in an SDK. Change the spec here first.
   - a rule that number props also accept macro strings;
   - `required` lists reconciled against what the converter and the builder actually write;
   - consistent key naming. `pv-slider` uses `min`/`max` while `pv-spinbox` uses `minValue`/`maxValue`.
+- **The root type and `supportsChildren` aren't enforced.** `absolute-canvas` belongs at the root and nowhere else, and only types with `supportsChildren: true` should have `children`, but no semantic rule checks either yet. A document with a `pv-label` root, or a `pv-led` with children, passes validation.
 - **Mixed drafts.** The prop schemas are draft-07 and the document schema is 2020-12.
 - **No conformance cases for macro expansion or rule evaluation yet.** Today only the runtime implements them.
 
 ## Where the initial content came from
 
-- `screen-ir/screen-ir.schema.json`: copied byte-for-byte from `slaclab/canopy-sdk-js` `packages/screen-ir/schema/` at `74fc229` (package version 0.1.2).
-- `screen-ir/widgets/*.json`: the IR fields (`id`, `version`, `description`, `propSchema`, `supportsPv`, `supportsRules`, `supportsChildren`) taken from `slaclab/canopy` `widget-registry-data/widgets/*.json` at `bfd8104`. The values are unchanged (checked field by field), except two prop schemas: `pv-button` and `absolute-canvas` come from `pydm-converter-tool`'s bundled registry at `019ee4e`, which adds the props the converter has emitted since 1.0.6 (nine on `pv-button`, `backgroundColor` on `absolute-canvas`). The files are not byte-identical: the other fields were dropped and the JSON was reformatted. `unknown-widget.json` is new; it describes what `pydm-converter-tool` emits.
+- `screen-ir/screen-ir.schema.json`: copied from `slaclab/canopy-sdk-js` `packages/screen-ir/schema/` at `74fc229` (package version 0.1.2). Only `description` strings have changed since: they named the TypeScript package as the owner and `validate()` as the place the semantic rules live. The structure is identical.
+- `screen-ir/widgets/*.json`: the IR fields (`id`, `version`, `description`, `propSchema`, `supportsPv`, `supportsRules`, `supportsChildren`) taken from `slaclab/canopy` `widget-registry-data/widgets/*.json` at `bfd8104`. The values are unchanged (checked field by field), with two exceptions:
+  - The `pv-button` and `absolute-canvas` prop schemas come from `pydm-converter-tool`'s bundled registry at `019ee4e`, which adds the props the converter has emitted since 1.0.6 (nine on `pv-button`, `backgroundColor` on `absolute-canvas`). Both definitions are version 1.1.0, so they aren't confused with Beaver's 1.0.0.
+  - Every `propSchema.$schema` is the draft-07 meta-schema's identifier, `http://json-schema.org/draft-07/schema#`. Beaver used `https://json-schema.org/draft-07/schema`, which ajv and Python `jsonschema` don't recognize.
+
+  The files are not byte-identical: the other fields were dropped and the JSON was reformatted. `unknown-widget.json` is new; it describes what `pydm-converter-tool` emits.
 - `conformance/screen-ir/validate/*.json`: new. They cover the cases in `canopy-sdk-js`'s `validate.test.ts` and the semantic rules in its `validate.ts`.
 
 Background: slaclab/canopy-sdk-js#4 and slaclab/canopy-screen-runtime#6.
