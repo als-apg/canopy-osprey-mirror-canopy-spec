@@ -1,10 +1,10 @@
 {
-  "description": "A top-level prop `fox://missing` with no matching `formulas[]` entry.",
+  "description": "A conditional rule whose PV is an undeclared `formula://` formula.",
   "valid": false,
   "errors": [
     {
-      "rule": "fox-ref-unresolved",
-      "instancePath": "/root/children/0/props/pv"
+      "rule": "formula-ref-unresolved",
+      "instancePath": "/root/children/0/rules/0/pvs/0/name"
     }
   ],
   "screen": {
@@ -40,27 +40,36 @@
           "id": "w-002",
           "type": "pv-label",
           "props": {
-            "pv": "fox://missing"
+            "pv": "DEMO:A"
           },
           "geometry": {
             "x": 10,
             "y": 10,
             "width": 80,
             "height": 20
-          }
+          },
+          "rules": [
+            {
+              "id": "r-001",
+              "name": "visibility",
+              "targetProperty": "visible",
+              "default": true,
+              "pvs": [
+                {
+                  "name": "formula://missing",
+                  "trigger": true
+                }
+              ],
+              "conditions": [
+                {
+                  "expression": "x > 0",
+                  "value": true
+                }
+              ]
+            }
+          ]
         }
       ]
-    },
-    "formulas": [
-      {
-        "name": "sum",
-        "kind": "scalar",
-        "expression": "a + b",
-        "bindings": {
-          "a": "DEMO:A",
-          "b": "DEMO:B"
-        }
-      }
-    ]
+    }
   }
 }

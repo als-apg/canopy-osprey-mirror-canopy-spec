@@ -1,12 +1,6 @@
 {
-  "description": "A formula rule referencing an undeclared formula.",
-  "valid": false,
-  "errors": [
-    {
-      "rule": "fox-ref-unresolved",
-      "instancePath": "/root/children/0/rules/0/formula"
-    }
-  ],
+  "description": "A top-level prop value `formula://sum` resolves to a declared formula.",
+  "valid": true,
   "screen": {
     "schemaVersion": "1.0",
     "kind": "screen",
@@ -40,25 +34,27 @@
           "id": "w-002",
           "type": "pv-label",
           "props": {
-            "pv": "DEMO:A"
+            "pv": "formula://sum"
           },
           "geometry": {
             "x": 10,
             "y": 10,
             "width": 80,
             "height": 20
-          },
-          "rules": [
-            {
-              "id": "r-001",
-              "name": "visibility",
-              "targetProperty": "visible",
-              "default": true,
-              "formula": "fox://missing"
-            }
-          ]
+          }
         }
       ]
-    }
+    },
+    "formulas": [
+      {
+        "name": "sum",
+        "kind": "scalar",
+        "expression": "a + b",
+        "bindings": {
+          "a": "DEMO:A",
+          "b": "DEMO:B"
+        }
+      }
+    ]
   }
 }
