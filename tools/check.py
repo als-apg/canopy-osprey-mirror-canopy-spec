@@ -33,7 +33,7 @@ WIDGETS = SCREEN_IR / "widgets"
 CASE_SCHEMA = ROOT / "conformance" / "case.schema.json"
 VALIDATE_CASES = ROOT / "conformance" / "screen-ir" / "validate"
 
-FOX_PREFIX = "fox://"
+FORMULA_PREFIX = "formula://"
 
 
 def load(path: Path) -> Any:
@@ -82,23 +82,23 @@ def validate_screen(doc: Any, validator: Draft202012Validator) -> list[dict[str,
 
     formulas = {f["name"] for f in doc.get("formulas", [])}
 
-    def fox_name(ref: str) -> str:
-        return ref[len(FOX_PREFIX):] if ref.startswith(FOX_PREFIX) else ref
+    def formula_name(ref: str) -> str:
+        return ref[len(FORMULA_PREFIX):] if ref.startswith(FORMULA_PREFIX) else ref
 
     def unresolved(path: str) -> None:
-        errors.append({"rule": "fox-ref-unresolved", "instancePath": path})
+        errors.append({"rule": "formula-ref-unresolved", "instancePath": path})
 
     def walk(node: dict[str, Any], path: str) -> None:
         for key, value in node["props"].items():
-            if isinstance(value, str) and value.startswith(FOX_PREFIX):
-                if fox_name(value) not in formulas:
+            if isinstance(value, str) and value.startswith(FORMULA_PREFIX):
+                if formula_name(value) not in formulas:
                     unresolved(f"{path}/props{pointer([key])}")
         for j, rule in enumerate(node.get("rules", [])):
-            if "formula" in rule and fox_name(rule["formula"]) not in formulas:
+            if "formula" in rule and formula_name(rule["formula"]) not in formulas:
                 unresolved(f"{path}/rules/{j}/formula")
             for k, pv in enumerate(rule.get("pvs", [])):
                 name = pv["name"]
-                if name.startswith(FOX_PREFIX) and fox_name(name) not in formulas:
+                if name.startswith(FORMULA_PREFIX) and formula_name(name) not in formulas:
                     unresolved(f"{path}/rules/{j}/pvs/{k}/name")
         for c, child in enumerate(node.get("children", [])):
             walk(child, f"{path}/children/{c}")

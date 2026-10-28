@@ -1,9 +1,9 @@
 {
-  "description": "A formula rule naming an undeclared formula without the `fox://` prefix. A bare `formula` is a formula name, not an inline expression.",
+  "description": "A formula rule naming an undeclared formula without the `formula://` prefix. A bare `formula` is a formula name, not an inline expression.",
   "valid": false,
   "errors": [
     {
-      "rule": "fox-ref-unresolved",
+      "rule": "formula-ref-unresolved",
       "instancePath": "/root/children/0/rules/0/formula"
     }
   ],

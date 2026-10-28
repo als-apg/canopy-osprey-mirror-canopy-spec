@@ -1,5 +1,5 @@
 {
-  "description": "A formula rule may name its formula without the `fox://` prefix (`formula: vis`); the bare name resolves like `fox://vis`.",
+  "description": "Both rule forms resolve: a formula rule (`formula: formula://vis`) and a conditional rule whose PV is `formula://vis`.",
   "valid": true,
   "screen": {
     "schemaVersion": "1.0",
@@ -48,7 +48,25 @@
               "name": "visibility",
               "targetProperty": "visible",
               "default": true,
-              "formula": "vis"
+              "formula": "formula://vis"
+            },
+            {
+              "id": "r-002",
+              "name": "visibility",
+              "targetProperty": "visible",
+              "default": true,
+              "pvs": [
+                {
+                  "name": "formula://vis",
+                  "trigger": true
+                }
+              ],
+              "conditions": [
+                {
+                  "expression": "x > 0",
+                  "value": true
+                }
+              ]
             }
           ]
         }

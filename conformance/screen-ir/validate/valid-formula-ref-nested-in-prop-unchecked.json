@@ -1,5 +1,5 @@
 {
-  "description": "A top-level prop value `fox://sum` resolves to a declared formula.",
+  "description": "In v0.1 `formula-ref-unresolved` checks top-level prop values only: an unresolved `formula://` reference inside a nested prop value (here a `waveform-plot` curve) is not reported.",
   "valid": true,
   "screen": {
     "schemaVersion": "1.0",
@@ -32,29 +32,23 @@
       "children": [
         {
           "id": "w-002",
-          "type": "pv-label",
+          "type": "waveform-plot",
           "props": {
-            "pv": "fox://sum"
+            "title": "Demo",
+            "curves": [
+              {
+                "y_channel": "formula://undeclared"
+              }
+            ]
           },
           "geometry": {
             "x": 10,
             "y": 10,
             "width": 80,
-            "height": 20
+            "height": 60
           }
         }
       ]
-    },
-    "formulas": [
-      {
-        "name": "sum",
-        "kind": "scalar",
-        "expression": "a + b",
-        "bindings": {
-          "a": "DEMO:A",
-          "b": "DEMO:B"
-        }
-      }
-    ]
+    }
   }
 }

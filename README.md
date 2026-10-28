@@ -38,9 +38,9 @@ JSON Schema can't express these rules, so they're defined here. An implementatio
 |---|---|---|
 | `macro-default-required` | `kind` is `screen` and a macro has no `default` | `/macros/{i}` |
 | `macro-default-forbidden` | `kind` is `template` and a macro declares a `default` | `/macros/{i}` |
-| `fox-ref-unresolved` | A `fox://<name>` reference has no `formulas[]` entry named `<name>`. Checked in: top-level string prop values, a rule's `formula`, and a rule's `pvs[].name` | The prop, `.../rules/{j}/formula`, or `.../rules/{j}/pvs/{k}/name` |
+| `formula-ref-unresolved` | A `formula://<name>` reference has no `formulas[]` entry named `<name>`. Checked in: top-level string prop values, a rule's `formula`, and a rule's `pvs[].name` | The prop, `.../rules/{j}/formula`, or `.../rules/{j}/pvs/{k}/name` |
 
-A rule's `formula` may be written with or without the `fox://` prefix; either way it names a formula, it isn't an inline expression. Nested prop values, such as channels inside `waveform-plot` curves, aren't checked in v0.1, and implementations must not report them.
+A rule's `formula` may be written with or without the `formula://` prefix; either way it names a formula, it isn't an inline expression. Nested prop values, such as channels inside `waveform-plot` curves, aren't checked in v0.1, and implementations must not report them.
 
 ### Widget definitions
 
@@ -51,7 +51,7 @@ Each file in `screen-ir/widgets/` defines one IR widget type:
 - **`supportsPv`**, **`supportsRules`** and **`supportsChildren`** say whether the widget binds a PV through a top-level `pv-channel` prop, whether rules can target it, and whether its node can have `children`. `waveform-plot` binds PVs only inside its `curves`, so its `supportsPv` is false.
 - **`propSchema`** is a JSON Schema (draft-07, `"$schema": "http://json-schema.org/draft-07/schema#"`) describing the node's `props`.
 
-**`format: "pv-channel"`** marks a string prop whose value is a PV address, such as `DEMO:A`, `ca://DEMO:A` or `pva://DEMO:A`, or a `fox://<name>` formula reference. A rule's `targetProperty` can't name a `pv-channel` prop.
+**`format: "pv-channel"`** marks a string prop whose value is a PV address, such as `DEMO:A`, `ca://DEMO:A` or `pva://DEMO:A`, or a `formula://<name>` reference to a screen formula. A rule's `targetProperty` can't name a `pv-channel` prop.
 
 **The list of IR widget types is the set of files in this directory.** No separate list is kept, so there's nothing to fall out of sync. `absolute-canvas` is the document root, and `unknown-widget` is the converter's placeholder for source classes it has no definition for. Both are real types and have files here.
 

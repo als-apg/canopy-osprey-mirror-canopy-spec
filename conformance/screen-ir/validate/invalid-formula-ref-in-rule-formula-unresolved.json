@@ -1,6 +1,12 @@
 {
-  "description": "In v0.1 `fox-ref-unresolved` checks top-level prop values only: an unresolved `fox://` reference inside a nested prop value (here a `waveform-plot` curve) is not reported.",
-  "valid": true,
+  "description": "A formula rule referencing an undeclared formula.",
+  "valid": false,
+  "errors": [
+    {
+      "rule": "formula-ref-unresolved",
+      "instancePath": "/root/children/0/rules/0/formula"
+    }
+  ],
   "screen": {
     "schemaVersion": "1.0",
     "kind": "screen",
@@ -32,21 +38,25 @@
       "children": [
         {
           "id": "w-002",
-          "type": "waveform-plot",
+          "type": "pv-label",
           "props": {
-            "title": "Demo",
-            "curves": [
-              {
-                "y_channel": "fox://undeclared"
-              }
-            ]
+            "pv": "DEMO:A"
           },
           "geometry": {
             "x": 10,
             "y": 10,
             "width": 80,
-            "height": 60
-          }
+            "height": 20
+          },
+          "rules": [
+            {
+              "id": "r-001",
+              "name": "visibility",
+              "targetProperty": "visible",
+              "default": true,
+              "formula": "formula://missing"
+            }
+          ]
         }
       ]
     }
