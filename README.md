@@ -94,7 +94,7 @@ Each invalid case breaks exactly one rule. Schema-error locations were chosen to
 2. In the SDK's CI, check that the copied files are byte-identical to that tag, and run the conformance cases.
 3. When this repo releases, open a PR in each SDK that bumps the pin. The SDK's CI shows whether it still conforms.
 
-Don't edit copied files in an SDK. Change the spec here first.
+Don't edit copied files in an SDK. Change the spec here first. Keep a copy of [LICENSE.md](LICENSE.md) next to them: the license requires redistributed source to keep its notice.
 
 ## Versions
 
@@ -130,3 +130,7 @@ Don't edit copied files in an SDK. Change the spec here first.
 - `conformance/screen-ir/validate/*.json`: new. They cover the cases in `canopy-sdk-js`'s `validate.test.ts` and the semantic rules in its `validate.ts`.
 
 Background: slaclab/canopy-sdk-js#4 and slaclab/canopy-screen-runtime#6.
+
+## Contributing and license
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). canopy-spec is distributed under the terms in [LICENSE.md](LICENSE.md).
