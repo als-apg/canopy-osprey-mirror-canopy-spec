@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://controls.slac.stanford.edu/schemas/screen-ir/1.0/schema.json",
+  "$id": "urn:canopy:screen-ir:1.0",
   "title": "Canopy Screen IR",
   "description": "Canonical Canopy screen Intermediate Representation, owned by canopy-spec. This file is the structural part of the contract; the cross-field rules it can't express (macro defaults, formula:// resolution) are the semantic rules in the canopy-spec README.",
   "type": "object",
