@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.1.0
 
 Initial import:
 - `screen-ir/screen-ir.schema.json`, Screen IR `schemaVersion` 1.0, from `@slaclab/canopy-screen-ir` 0.1.2 (descriptions updated, structure unchanged).
 - 32 widget definitions in `screen-ir/widgets/`: 31 carried over from the Beaver widget registry (IR fields only; the `pv-button` and `absolute-canvas` prop schemas from `pydm-converter-tool`'s bundled copy, which has the props the converter emits, so both are version 1.1.0), plus `unknown-widget`. Prop schemas declare the canonical draft-07 `$schema`, `http://json-schema.org/draft-07/schema#`.
 - `screen-ir/widget-definition.schema.json` and `conformance/case.schema.json`.
+- Each schema's `$id` is a URN that names the contract without pointing at a host: `urn:canopy:screen-ir:1.0`, `urn:canopy:screen-ir:1.0:widget-definition` and `urn:canopy-spec:conformance-case`. Nothing resolves through them; every `$ref` is local.
 - The `pv-channel` prop format, documented in the README.
 - 22 validation conformance cases, with the semantic rule ids `macro-default-required`, `macro-default-forbidden` and `formula-ref-unresolved`.
 - `tools/check.py` reference checker, run in CI.

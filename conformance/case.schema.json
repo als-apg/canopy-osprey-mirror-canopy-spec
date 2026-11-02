@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://controls.slac.stanford.edu/schemas/canopy-spec/conformance-case.schema.json",
+  "$id": "urn:canopy-spec:conformance-case",
   "title": "Canopy spec conformance case",
   "description": "One validation case. An implementation feeds `screen` to its validator and compares the outcome with `valid` (level 1) and `errors` (level 2).",
   "type": "object",
