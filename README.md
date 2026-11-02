@@ -122,7 +122,7 @@ Don't edit copied files in an SDK. Change the spec here first.
 ## Where the initial content came from
 
 - `screen-ir/screen-ir.schema.json`: copied from `slaclab/canopy-sdk-js` `packages/screen-ir/schema/` at `74fc229` (package version 0.1.2). Only `description` strings have changed since: they named the TypeScript package as the owner and `validate()` as the place the semantic rules live. The structure is identical.
-- `screen-ir/widgets/*.json`: the IR fields (`id`, `version`, `description`, `propSchema`, `supportsPv`, `supportsRules`, `supportsChildren`) taken from `slaclab/canopy` `widget-registry-data/widgets/*.json` at `bfd8104`. The values are unchanged (checked field by field), with two exceptions:
+- `screen-ir/widgets/*.json`: the IR fields (`id`, `version`, `description`, `propSchema`, `supportsPv`, `supportsRules`, `supportsChildren`) taken from `slaclab/canopy` `widget-registry-data/widgets/*.json` at `01bcd7d`. The values are unchanged (checked field by field), with two exceptions:
   - The `pv-button` and `absolute-canvas` prop schemas come from `pydm-converter-tool`'s bundled registry at `019ee4e`, which adds the props the converter has emitted since 1.0.6 (nine on `pv-button`, `backgroundColor` on `absolute-canvas`). Both definitions are version 1.1.0, so they aren't confused with Beaver's 1.0.0.
   - Every `propSchema.$schema` is the draft-07 meta-schema's identifier, `http://json-schema.org/draft-07/schema#`. Beaver used `https://json-schema.org/draft-07/schema`, which ajv and Python `jsonschema` don't recognize.
 
